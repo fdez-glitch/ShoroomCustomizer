@@ -199,7 +199,7 @@ const ShowroomCustomizer = {
     const showroomContainer = jQuery('#inventory-showroom');
     const titleRules = [
       ...(this.config.cleanTitleRules || []),
-      ...(this.showroomConfig.cleanTitleRules || []),
+      ...(this.showroomConfig?.cleanTitleRules || []),
     ];
 
     await this.appendShowrooms(showroomConfig, showroomContainer);
@@ -362,204 +362,204 @@ const ShowroomCustomizer = {
   },
 };
 
-// ShowroomCustomizer.init({
-//   cleanTitleRules: [/\s*\/\s*Boat$/i],
-//   showrooms: {
-//     '/showroom-marine/current/Phoenix%20Bass%20Boats/Boat/': {
-//       models: {
-//         '20XE': {
-//           urlImage: '/wp-content/uploads/2026/06/20XE.webp',
-//         },
-//         '21XE': {
-//           urlImage: '/wp-content/uploads/2026/06/21XE.webp',
-//         },
-//         '721ZXL': {
-//           urlImage: '/wp-content/uploads/2026/06/721ZXL.webp',
-//         },
-//         '818Pro': {
-//           urlImage: '/wp-content/uploads/2026/06/818Pro.webp',
-//         },
-//         '819ZXL': {
-//           urlImage: '/wp-content/uploads/2026/06/819ZXL.webp',
-//         },
-//         '919ZXL': {
-//           urlImage: '/wp-content/uploads/2026/06/919ZXL.webp',
-//         },
-//         '920Elite X': {
-//           urlImage: '/wp-content/uploads/2026/06/920Elite-X.webp',
-//         },
-//         '920Elite X II': {
-//           urlImage: '/wp-content/uploads/2026/06/920Elite-X-II.webp',
-//         },
-//         '921Elite X': {
-//           urlImage: '/wp-content/uploads/2026/06/921Elite-X.webp',
-//         },
-//         '921Elite X II': {
-//           urlImage: '/wp-content/uploads/2026/06/921Elite-X-II.webp',
-//         },
-//       },
-//     },
-//     '/showroom-marine/current/Vexus/Boat/': {
-//       cleanTitleRules: [/\s*Bass Boats$/i],
-//       newCategory: ['Aluminum', 'Fiberglass'],
-//       models: {
-//         VXs21: {
-//           urlImage: '/wp-content/uploads/2026/06/VXs21.webp',
-//           category: 'Fiberglass',
-//         },
-//         VXs20: {
-//           urlImage: '/wp-content/uploads/2026/06/VXs20.webp',
-//           category: 'Fiberglass',
-//         },
-//         DVX23s: {
-//           urlImage: '/wp-content/uploads/2026/06/DVX23s.webp',
-//           category: 'Fiberglass',
-//         },
-//         DVX22s: {
-//           urlImage: '/wp-content/uploads/2026/06/DVX22s.webp',
-//           category: 'Fiberglass',
-//         },
-//         'DVX20 XPro': {
-//           urlImage: '/wp-content/uploads/2026/06/DVX20-XPro.webp',
-//           category: 'Fiberglass',
-//         },
-//         'Defender 201': {
-//           urlImage: '/wp-content/uploads/2026/06/Defender-201.webp',
-//           category: 'Aluminum',
-//         },
-//         'Defender 189': {
-//           urlImage: '/wp-content/uploads/2026/06/Defender-189.webp',
-//           category: 'Aluminum',
-//         },
-//         'Defender 181': {
-//           urlImage: '/wp-content/uploads/2026/06/Defender-181.webp',
-//           category: 'Aluminum',
-//         },
-//         ADX180HS: {
-//           urlImage: '/wp-content/uploads/2026/06/ADX180HS.webp',
-//           category: 'Aluminum',
-//         },
-//         ACX2210: {
-//           urlImage: '/wp-content/uploads/2026/06/ACX2210.webp',
-//           category: 'Aluminum',
-//         },
-//         ACX2150: {
-//           urlImage: '/wp-content/uploads/2026/06/ACX2150.webp',
-//           category: 'Aluminum',
-//         },
-//         ACX2000: {
-//           urlImage: '/wp-content/uploads/2026/06/VXs21.webp',
-//           category: 'Aluminum',
-//         },
-//         AVX2085s: {
-//           urlImage: '/wp-content/uploads/2026/06/AVX2085s.webp',
-//           category: 'Aluminum',
-//         },
-//         AVX1985s: {
-//           urlImage: '/wp-content/uploads/2026/06/AVX1985s.webp',
-//           category: 'Aluminum',
-//         },
-//         'AVX 2100': {
-//           urlImage: '/wp-content/uploads/2026/06/AVX-2100.webp',
-//           category: 'Aluminum',
-//         },
-//         'AVX 1880': {
-//           category: 'Aluminum',
-//         },
-//         'AVX 1880c': {
-//           category: 'Aluminum',
-//         },
-//         'AVX 2080': {
-//           category: 'Aluminum',
-//         },
-//         ADX190: {
-//           category: 'Aluminum',
-//         },
-//         AVX1980c: {
-//           category: 'Aluminum',
-//         },
-//         'AVX 1980': {
-//           urlImage: '/wp-content/uploads/2026/06/AVX-1980.webp',
-//           category: 'Aluminum',
-//         },
-//         ADX202: {
-//           urlImage: '/wp-content/uploads/2026/06/ADX202.webp',
-//           category: 'Aluminum',
-//         },
-//         ADX200: {
-//           urlImage: '/wp-content/uploads/2026/06/ADX200.webp',
-//           category: 'Aluminum',
-//         },
-//         ADX180LS: {
-//           urlImage: '/wp-content/uploads/2026/06/ADX180LS.webp',
-//           category: 'Aluminum',
-//         },
-//         DVX20: { hide: true },
-//         DVX20s: { hide: true },
-//         DVX22: { hide: true },
-//       },
-//     },
-//     '/showroom-marine/current/BassCat/Boat/': {
-//       appendShowrooms: ['/showroom-marine/current/Yar-Craft/Boat/'],
-//       models: {
-//         '186 TFX': { hide: true },
-//         '209 TFX': { hide: true },
-//         '2095 BTX': { hide: true },
-//       },
-//     },
-//     '/showroom-marine/current/G3/Boat/': {
-//       models: {
-//         'Guide V14 LT': {
-//           category: 'Jon',
-//         },
-//         'Guide V16 XT': {
-//           category: 'Jon',
-//         },
-//         'OF V187 T': {
-//           category: 'Jon',
-//         },
-//         'V167 T': {
-//           category: 'Jon',
-//         },
-//         'Sportsman 1710 SE': {
-//           category: 'Fishing',
-//         },
-//         'Sportsman 1810 SE': {
-//           category: 'Fishing',
-//         },
-//         'Sportsman 1910 SE': {
-//           category: 'Fishing',
-//         },
-//         'Bay 19 GX': {
-//           category: 'Center Console',
-//         },
-//         'Bay 19 GX Tunnel': {
-//           category: 'Center Console',
-//         },
-//         'Bay 21 GX': {
-//           category: 'Center Console',
-//         },
-//         'Bay 21 GX Tunnel': {
-//           category: 'Center Console',
-//         },
-//         '18 SC': {
-//           category: 'Jon',
-//         },
-//         '20 SC': {
-//           category: 'Jon',
-//         },
-//       },
-//       cleanTitleRules: [],
-//     },
-//   },
-//   afterInit() {
-//     switch (window.location.pathname) {
-//       case '/showroom-marine/current/G3/Boat/':
-//         jQuery('.showroom-container h3')
-//           .filter((_, element) => jQuery(element).text().trim() === 'Fishing')
-//           .first()
-//           .text('Sportsman');
-//         break;
-//     }
-//   },
-// });
+ShowroomCustomizer.init({
+  cleanTitleRules: [/\s*\/\s*Boat$/i],
+  showrooms: {
+    '/showroom-marine/current/Phoenix%20Bass%20Boats/Boat/': {
+      models: {
+        '20XE': {
+          urlImage: '/wp-content/uploads/2026/06/20XE.webp',
+        },
+        '21XE': {
+          urlImage: '/wp-content/uploads/2026/06/21XE.webp',
+        },
+        '721ZXL': {
+          urlImage: '/wp-content/uploads/2026/06/721ZXL.webp',
+        },
+        '818Pro': {
+          urlImage: '/wp-content/uploads/2026/06/818Pro.webp',
+        },
+        '819ZXL': {
+          urlImage: '/wp-content/uploads/2026/06/819ZXL.webp',
+        },
+        '919ZXL': {
+          urlImage: '/wp-content/uploads/2026/06/919ZXL.webp',
+        },
+        '920Elite X': {
+          urlImage: '/wp-content/uploads/2026/06/920Elite-X.webp',
+        },
+        '920Elite X II': {
+          urlImage: '/wp-content/uploads/2026/06/920Elite-X-II.webp',
+        },
+        '921Elite X': {
+          urlImage: '/wp-content/uploads/2026/06/921Elite-X.webp',
+        },
+        '921Elite X II': {
+          urlImage: '/wp-content/uploads/2026/06/921Elite-X-II.webp',
+        },
+      },
+    },
+    '/showroom-marine/current/Vexus/Boat/': {
+      cleanTitleRules: [/\s*Bass Boats$/i],
+      newCategory: ['Aluminum', 'Fiberglass'],
+      models: {
+        VXs21: {
+          urlImage: '/wp-content/uploads/2026/06/VXs21.webp',
+          category: 'Fiberglass',
+        },
+        VXs20: {
+          urlImage: '/wp-content/uploads/2026/06/VXs20.webp',
+          category: 'Fiberglass',
+        },
+        DVX23s: {
+          urlImage: '/wp-content/uploads/2026/06/DVX23s.webp',
+          category: 'Fiberglass',
+        },
+        DVX22s: {
+          urlImage: '/wp-content/uploads/2026/06/DVX22s.webp',
+          category: 'Fiberglass',
+        },
+        'DVX20 XPro': {
+          urlImage: '/wp-content/uploads/2026/06/DVX20-XPro.webp',
+          category: 'Fiberglass',
+        },
+        'Defender 201': {
+          urlImage: '/wp-content/uploads/2026/06/Defender-201.webp',
+          category: 'Aluminum',
+        },
+        'Defender 189': {
+          urlImage: '/wp-content/uploads/2026/06/Defender-189.webp',
+          category: 'Aluminum',
+        },
+        'Defender 181': {
+          urlImage: '/wp-content/uploads/2026/06/Defender-181.webp',
+          category: 'Aluminum',
+        },
+        ADX180HS: {
+          urlImage: '/wp-content/uploads/2026/06/ADX180HS.webp',
+          category: 'Aluminum',
+        },
+        ACX2210: {
+          urlImage: '/wp-content/uploads/2026/06/ACX2210.webp',
+          category: 'Aluminum',
+        },
+        ACX2150: {
+          urlImage: '/wp-content/uploads/2026/06/ACX2150.webp',
+          category: 'Aluminum',
+        },
+        ACX2000: {
+          urlImage: '/wp-content/uploads/2026/06/VXs21.webp',
+          category: 'Aluminum',
+        },
+        AVX2085s: {
+          urlImage: '/wp-content/uploads/2026/06/AVX2085s.webp',
+          category: 'Aluminum',
+        },
+        AVX1985s: {
+          urlImage: '/wp-content/uploads/2026/06/AVX1985s.webp',
+          category: 'Aluminum',
+        },
+        'AVX 2100': {
+          urlImage: '/wp-content/uploads/2026/06/AVX-2100.webp',
+          category: 'Aluminum',
+        },
+        'AVX 1880': {
+          category: 'Aluminum',
+        },
+        'AVX 1880c': {
+          category: 'Aluminum',
+        },
+        'AVX 2080': {
+          category: 'Aluminum',
+        },
+        ADX190: {
+          category: 'Aluminum',
+        },
+        AVX1980c: {
+          category: 'Aluminum',
+        },
+        'AVX 1980': {
+          urlImage: '/wp-content/uploads/2026/06/AVX-1980.webp',
+          category: 'Aluminum',
+        },
+        ADX202: {
+          urlImage: '/wp-content/uploads/2026/06/ADX202.webp',
+          category: 'Aluminum',
+        },
+        ADX200: {
+          urlImage: '/wp-content/uploads/2026/06/ADX200.webp',
+          category: 'Aluminum',
+        },
+        ADX180LS: {
+          urlImage: '/wp-content/uploads/2026/06/ADX180LS.webp',
+          category: 'Aluminum',
+        },
+        DVX20: { hide: true },
+        DVX20s: { hide: true },
+        DVX22: { hide: true },
+      },
+    },
+    '/showroom-marine/current/BassCat/Boat/': {
+      appendShowrooms: ['/showroom-marine/current/Yar-Craft/Boat/'],
+      models: {
+        '186 TFX': { hide: true },
+        '209 TFX': { hide: true },
+        '2095 BTX': { hide: true },
+      },
+    },
+    '/showroom-marine/current/G3/Boat/': {
+      models: {
+        'Guide V14 LT': {
+          category: 'Jon',
+        },
+        'Guide V16 XT': {
+          category: 'Jon',
+        },
+        'OF V187 T': {
+          category: 'Jon',
+        },
+        'V167 T': {
+          category: 'Jon',
+        },
+        'Sportsman 1710 SE': {
+          category: 'Fishing',
+        },
+        'Sportsman 1810 SE': {
+          category: 'Fishing',
+        },
+        'Sportsman 1910 SE': {
+          category: 'Fishing',
+        },
+        'Bay 19 GX': {
+          category: 'Center Console',
+        },
+        'Bay 19 GX Tunnel': {
+          category: 'Center Console',
+        },
+        'Bay 21 GX': {
+          category: 'Center Console',
+        },
+        'Bay 21 GX Tunnel': {
+          category: 'Center Console',
+        },
+        '18 SC': {
+          category: 'Jon',
+        },
+        '20 SC': {
+          category: 'Jon',
+        },
+      },
+      cleanTitleRules: [],
+    },
+  },
+  afterInit() {
+    switch (window.location.pathname) {
+      case '/showroom-marine/current/G3/Boat/':
+        jQuery('.showroom-container h3')
+          .filter((_, element) => jQuery(element).text().trim() === 'Fishing')
+          .first()
+          .text('Sportsman');
+        break;
+    }
+  },
+});
