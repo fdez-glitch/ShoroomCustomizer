@@ -1,195 +1,26 @@
-/*
-|--------------------------------------------------------------------------
-| Showroom Script
-|--------------------------------------------------------------------------
-|
-| This script applies showroom-specific customizations based on the
-| current showroom URL (window.location.pathname).
-|
-|--------------------------------------------------------------------------
-| Adding a New Showroom
-|--------------------------------------------------------------------------
-|
-| Each showroom must be registered using its showroom URL.
-|
-| Example:
-|
-| '/showroom-marine/current/MyBrand/Boat/': {
-|   ...
-| }
-|
-| The URL must match:
-|
-| window.location.pathname
-|
-| Example:
-|
-| URL:
-| https://www.example.com/showroom-marine/current/MyBrand/Boat/
-|
-| Pathname:
-| /showroom-marine/current/MyBrand/Boat/
-|
-|--------------------------------------------------------------------------
-| Configuration Options
-|--------------------------------------------------------------------------
-|
-| hide
-| ----
-| Removes a model from the showroom.
-| Can be combined with other options.
-|
-| Example:
-|
-| 'DVX20': {
-|   hide: true
-| }
-|
-|--------------------------------------------------------------------------
-|
-| urlImage
-| --------
-| Replaces the showroom image for a model.
-| Can be combined with other options.
-|
-| Example:
-|
-| 'VXs21': {
-|   urlImage: '/wp-content/uploads/2026/06/VXs21.webp'
-| }
-|
-|--------------------------------------------------------------------------
-|
-| category
-| --------
-| Assigns a model to a category.
-| Can be combined with other options.
-|
-| The category must exist in "newCategory".
-|
-| Example:
-|
-| 'VXs21': {
-|   category: 'Fiberglass'
-| }
-|
-|--------------------------------------------------------------------------
-|
-| newCategory
-| -----------
-| Creates custom categories inside the showroom.
-|
-| Example:
-|
-| newCategory: [
-|   'Aluminum',
-|   'Fiberglass'
-| ]
-|
-|--------------------------------------------------------------------------
-|
-| appendShowrooms
-| ---------------
-| Appends models from another showroom into the current showroom.
-|
-| Example:
-|
-| appendShowrooms: [
-|   '/showroom-marine/current/Yar-Craft/Boat/'
-| ]
-|
-|--------------------------------------------------------------------------
-| Combining Options
-|--------------------------------------------------------------------------
-|
-| Multiple options can be used together within the same model
-| configuration.
-|
-| Example:
-|
-| 'VXs21': {
-|   urlImage: '/wp-content/uploads/VXs21.webp',
-|   category: 'Fiberglass'
-| }
-|
-| Example:
-|
-| 'My Model': {
-|   hide: true,
-|   category: 'Aluminum'
-| }
-|
-| Do NOT create multiple entries for the same model.
-|
-| Incorrect:
-|
-| 'VXs21': {
-|   urlImage: '/image.webp'
-| },
-|
-| 'VXs21': {
-|   category: 'Fiberglass'
-| }
-|
-| The second entry will overwrite the first one.
-|
-|--------------------------------------------------------------------------
-| Example Configuration
-|--------------------------------------------------------------------------
-|
-| '/showroom-marine/current/MyBrand/Boat/': {
-|
-|   newCategory: [
-|     'Aluminum',
-|     'Fiberglass'
-|   ],
-|
-|   appendShowrooms: [
-|     '/showroom-marine/current/AnotherBrand/Boat/'
-|   ],
-|
-|   'Model Name': {
-|     category: 'Aluminum',
-|     urlImage: '/wp-content/uploads/image.webp'
-|   },
-|
-|   'Hidden Model': {
-|     hide: true
-|   }
-| }
-|
-|--------------------------------------------------------------------------
-| How It Works
-|--------------------------------------------------------------------------
-|
-| 1. Append additional showrooms
-| 2. Create configured categories
-| 3. Process model configurations
-| 4. Remove empty categories
-| 5. Remove showroom titles
-| 6. Clean page titles
-| 7. Apply dealer-specific customizations
-|
-|--------------------------------------------------------------------------
-| Dealer-Specific Customizations
-|--------------------------------------------------------------------------
-|
-| Use applyDealerSpecificChanges()
-|
-| for custom logic that cannot be handled through configuration.
-|
-| Examples:
-|
-| - Rename category labels
-| - Move custom elements
-| - Apply dealer-only UI changes
-| - Special showroom behavior
-|
-*/
-
 const ShowroomCustomizer = {
   async init(config) {
     this.config = config;
+
+    this.observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+
+          const item = entry.target;
+
+          item.style.backgroundImage = item.dataset.bg;
+
+          delete item.dataset.bg;
+
+          this.observer.unobserve(item);
+        });
+      },
+      {
+        rootMargin: '300px 0px',
+        threshold: 0.01,
+      }
+    );
 
     const pathname = window.location.pathname;
     const showroomConfig = config.showrooms[pathname];
@@ -199,7 +30,7 @@ const ShowroomCustomizer = {
     const showroomContainer = jQuery('#inventory-showroom');
     const titleRules = [
       ...(this.config.cleanTitleRules || []),
-      ...(this.showroomConfig?.cleanTitleRules || []),
+      ...(showroomConfig.cleanTitleRules || []),
     ];
 
     await this.appendShowrooms(showroomConfig, showroomContainer);
@@ -210,13 +41,26 @@ const ShowroomCustomizer = {
     this.removeShowroomTitles(pathname);
     this.cleanPageTitles(titleRules);
 
+    jQuery(showroomContainer)
+      .find('.showroom-item')
+      .each((_, e) => this.observeBackgroundImage(e));
+
     if (typeof config.afterInit === 'function') {
       config.afterInit();
     }
   },
 
+  safeArray(v) {
+    return Array.isArray(v) ? v : [];
+  },
+
+  observeBackgroundImage(element) {
+    this.observer.observe(element);
+  },
+
   async appendShowrooms(showroomConfig, showroomContainer) {
     const showrooms = showroomConfig.appendShowrooms || [];
+    const newShowrooms = [];
 
     for (const url of showrooms) {
       try {
@@ -227,55 +71,82 @@ const ShowroomCustomizer = {
           continue;
         }
 
-        const html = await response.text();
+        const html = jQuery(await response.text());
 
-        showroomContainer.append(
-          jQuery(html).find('.showroom-container').first()
-        );
+        html.find('.showroom-item').each((_, element) => {
+          const bg = element.style.backgroundImage;
+
+          if (!bg || bg === 'none') return;
+          element.dataset.bg = bg;
+          element.style.backgroundImage = '';
+        });
+
+        // showroomContainer.append();
+        newShowrooms.push(html.find('.showroom-container').first());
       } catch (error) {
         console.error('Error appending showroom:', url, error);
       }
     }
+
+    newShowrooms.forEach((showroom) => {
+      showroomContainer.append(showroom);
+    });
   },
-
   createCategories(showroomConfig, showroomContainer) {
-    const { newCategories, brand } = showroomConfig.newCategory || [];
+    const categories = this.safeArray(showroomConfig.newCategory);
 
-    const categoryContainer = showroomContainer
-      .find('h1')
-      .filter((_, e) => jQuery(e).text().includes(brand));
+    categories.forEach(({ newCategories, brand }) => {
+      if (!newCategories || !brand) return;
 
-    categories.forEach((category) => {
-      categoryContainer.append(`
-      <div style="padding:20px 0;">
-        <h3 style="text-align:left;">${category}</h3>
-      </div>
-      <div style="clear:both;"></div>
-    `);
+      const categoryContainer = showroomContainer
+        .find('h1')
+        .filter((_, e) => jQuery(e).text().includes(brand))
+        .first()
+        .parent();
+
+      newCategories.forEach((category) => {
+        categoryContainer.append(`
+          <div style="padding:20px 0;">
+            <h3 style="text-align:left;">${category}</h3>
+          </div>
+          <div style="clear:both;"></div>
+        `);
+      });
     });
   },
 
   removeCategories(showroomConfig, showroomContainer) {
-    const { brand = unset, categories = unset } =
-      showroomConfig.removeCategories;
+    const categoriesToHide = this.safeArray(showroomConfig.removeCategories);
 
-    if (!showroomConfig.removeCategories) return;
+    categoriesToHide.forEach(({ categories, brand }) => {
+      if (!brand || !categories) return;
 
-    const categoryContainer = showroomContainer
-      .find('h1')
-      .filter((_, e) =>
-        jQuery(e).text().toLowerCase().includes(brand.toLowerCase())
-      );
+      const categoryContainer = showroomContainer
+        .find('h1')
+        .filter((_, e) =>
+          jQuery(e).text().toLowerCase().includes(brand.toLowerCase())
+        )
+        .first()
+        .parent();
 
-    if (categoryContainer.length) {
-      categoryContainer.parent().remove();
-    }
+      categories.forEach((subCategory) => {
+        const subCategoryContainer = jQuery(categoryContainer)
+          .find('h3')
+          .filter((_, e) => jQuery(e).text().trim() === subCategory)
+          .first()
+          .parent();
+
+        subCategoryContainer.remove();
+      });
+    });
   },
 
   processModels(showroomConfig) {
+    const models = showroomConfig.models || {};
+
     jQuery('.showroom-container .showroom-item').each((_, element) => {
       const modelName = this.getModelName(element);
-      const modelConfig = showroomConfig.models[modelName];
+      const modelConfig = models[modelName];
 
       if (!modelConfig) return;
 
@@ -366,248 +237,9 @@ const ShowroomCustomizer = {
     jQuery('.showroom-container h1').each((_, element) => {
       const title = jQuery(element).text().trim();
 
-      // jQuery(element).text(
-      //   title
-      //     .replace(/\s*\/\s*Boat$/i, '')
-      //     .replace(/\s*Bass Boats$/i, '')
-      //     .trim()
-      // );
-
       titleRules.forEach((rule) => {
-        title = title.replace(rule, '');
+        jQuery(element).text(title.replace(rule, ''));
       });
-
-      jQuery(element).text(title);
     });
   },
 };
-
-// ShowroomCustomizer.init({
-//   cleanTitleRules: [/\s*\/\s*Boat$/i],
-//   showrooms: {
-//     '/showroom-marine/current/Phoenix%20Bass%20Boats/Boat/': {
-//       models: {
-//         '20XE': {
-//           urlImage: '/wp-content/uploads/2026/06/20XE.webp',
-//         },
-//         '21XE': {
-//           urlImage: '/wp-content/uploads/2026/06/21XE.webp',
-//         },
-//         '721ZXL': {
-//           urlImage: '/wp-content/uploads/2026/06/721ZXL.webp',
-//         },
-//         '818Pro': {
-//           urlImage: '/wp-content/uploads/2026/06/818Pro.webp',
-//         },
-//         '819ZXL': {
-//           urlImage: '/wp-content/uploads/2026/06/819ZXL.webp',
-//         },
-//         '919ZXL': {
-//           urlImage: '/wp-content/uploads/2026/06/919ZXL.webp',
-//         },
-//         '920Elite X': {
-//           urlImage: '/wp-content/uploads/2026/06/920Elite-X.webp',
-//         },
-//         '920Elite X II': {
-//           urlImage: '/wp-content/uploads/2026/06/920Elite-X-II.webp',
-//         },
-//         '921Elite X': {
-//           urlImage: '/wp-content/uploads/2026/06/921Elite-X.webp',
-//         },
-//         '921Elite X II': {
-//           urlImage: '/wp-content/uploads/2026/06/921Elite-X-II.webp',
-//         },
-//       },
-//     },
-//     '/showroom-marine/current/Vexus/Boat/': {
-//       cleanTitleRules: [/\s*Bass Boats$/i],
-//       newCategory: ['Aluminum', 'Fiberglass'],
-//       models: {
-//         VXs21: {
-//           urlImage: '/wp-content/uploads/2026/06/VXs21.webp',
-//           category: 'Fiberglass',
-//         },
-//         VXs20: {
-//           urlImage: '/wp-content/uploads/2026/06/VXs20.webp',
-//           category: 'Fiberglass',
-//         },
-//         DVX23s: {
-//           urlImage: '/wp-content/uploads/2026/06/DVX23s.webp',
-//           category: 'Fiberglass',
-//         },
-//         DVX22s: {
-//           urlImage: '/wp-content/uploads/2026/06/DVX22s.webp',
-//           category: 'Fiberglass',
-//         },
-//         'DVX20 XPro': {
-//           urlImage: '/wp-content/uploads/2026/06/DVX20-XPro.webp',
-//           category: 'Fiberglass',
-//         },
-//         'Defender 201': {
-//           urlImage: '/wp-content/uploads/2026/06/Defender-201.webp',
-//           category: 'Aluminum',
-//         },
-//         'Defender 189': {
-//           urlImage: '/wp-content/uploads/2026/06/Defender-189.webp',
-//           category: 'Aluminum',
-//         },
-//         'Defender 181': {
-//           urlImage: '/wp-content/uploads/2026/06/Defender-181.webp',
-//           category: 'Aluminum',
-//         },
-//         ADX180HS: {
-//           urlImage: '/wp-content/uploads/2026/06/ADX180HS.webp',
-//           category: 'Aluminum',
-//         },
-//         ACX2210: {
-//           urlImage: '/wp-content/uploads/2026/06/ACX2210.webp',
-//           category: 'Aluminum',
-//         },
-//         ACX2150: {
-//           urlImage: '/wp-content/uploads/2026/06/ACX2150.webp',
-//           category: 'Aluminum',
-//         },
-//         ACX2000: {
-//           urlImage: '/wp-content/uploads/2026/06/VXs21.webp',
-//           category: 'Aluminum',
-//         },
-//         AVX2085s: {
-//           urlImage: '/wp-content/uploads/2026/06/AVX2085s.webp',
-//           category: 'Aluminum',
-//         },
-//         AVX1985s: {
-//           urlImage: '/wp-content/uploads/2026/06/AVX1985s.webp',
-//           category: 'Aluminum',
-//         },
-//         'AVX 2100': {
-//           urlImage: '/wp-content/uploads/2026/06/AVX-2100.webp',
-//           category: 'Aluminum',
-//         },
-//         'AVX 1880': {
-//           category: 'Aluminum',
-//         },
-//         'AVX 1880c': {
-//           category: 'Aluminum',
-//         },
-//         'AVX 2080': {
-//           category: 'Aluminum',
-//         },
-//         ADX190: {
-//           category: 'Aluminum',
-//         },
-//         AVX1980c: {
-//           category: 'Aluminum',
-//         },
-//         'AVX 1980': {
-//           urlImage: '/wp-content/uploads/2026/06/AVX-1980.webp',
-//           category: 'Aluminum',
-//         },
-//         ADX202: {
-//           urlImage: '/wp-content/uploads/2026/06/ADX202.webp',
-//           category: 'Aluminum',
-//         },
-//         ADX200: {
-//           urlImage: '/wp-content/uploads/2026/06/ADX200.webp',
-//           category: 'Aluminum',
-//         },
-//         ADX180LS: {
-//           urlImage: '/wp-content/uploads/2026/06/ADX180LS.webp',
-//           category: 'Aluminum',
-//         },
-//         DVX20: { hide: true },
-//         DVX20s: { hide: true },
-//         DVX22: { hide: true },
-//       },
-//     },
-//     '/showroom-marine/current/BassCat/Boat/': {
-//       appendShowrooms: ['/showroom-marine/current/Yar-Craft/Boat/'],
-//       models: {
-//         '186 TFX': { hide: true },
-//         '209 TFX': { hide: true },
-//         '2095 BTX': { hide: true },
-//       },
-//     },
-//     '/showroom-marine/current/G3/Boat/': {
-//       models: {
-//         'Guide V14 LT': {
-//           category: 'Jon',
-//         },
-//         'Guide V16 XT': {
-//           category: 'Jon',
-//         },
-//         'OF V187 T': {
-//           category: 'Jon',
-//         },
-//         'V167 T': {
-//           category: 'Jon',
-//         },
-//         'Sportsman 1710 SE': {
-//           category: 'Fishing',
-//         },
-//         'Sportsman 1810 SE': {
-//           category: 'Fishing',
-//         },
-//         'Sportsman 1910 SE': {
-//           category: 'Fishing',
-//         },
-//         'Bay 19 GX': {
-//           category: 'Center Console',
-//         },
-//         'Bay 19 GX Tunnel': {
-//           category: 'Center Console',
-//         },
-//         'Bay 21 GX': {
-//           category: 'Center Console',
-//         },
-//         'Bay 21 GX Tunnel': {
-//           category: 'Center Console',
-//         },
-//         '18 SC': {
-//           category: 'Jon',
-//         },
-//         '20 SC': {
-//           category: 'Jon',
-//         },
-//       },
-//       cleanTitleRules: [],
-//     },
-//   },
-//   afterInit() {
-//     switch (window.location.pathname) {
-//       case '/showroom-marine/current/G3/Boat/':
-//         jQuery('.showroom-container h3')
-//           .filter((_, element) => jQuery(element).text().trim() === 'Fishing')
-//           .first()
-//           .text('Sportsman');
-//         break;
-//     }
-//   },
-// });
-
-// Logan Equiment example
-// ShowroomCustomizer.init({
-//   // cleanTitleRules: [/\s*\/\s*Boat$/i],
-//   showrooms: {
-//     '/gravely-and-ariens-zero-turn-showroom/': {
-//       cleanTitleRules: [/\s*\/\s*Lawn Mower$/i],
-
-//       newCategory: [
-//         {
-//           brand: 'Ariens',
-//           newCategories: ['Aluminum', 'Fiberglass'],
-//         },
-//       ],
-//       removeCategories: [
-//         {
-//           brand: 'Gravely',
-//           categories: ['General'],
-//         },
-//       ],
-//       appendShowrooms: [
-//         '/showroom/current/Ariens/',
-//         '/power-equipment-lawn-showroom-blocks/current/Gravely/',
-//       ],
-//     },
-//   },
-//   afterInit() {},
-// });
